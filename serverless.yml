@@ -1,0 +1,52 @@
+service: pokedolar-bot
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+
+  # stage can be passed as parameter in deploy with sls deploy -stage <stage>. Default is dev
+  stage: ${opt:stage, "dev"}
+
+  # service level envvars
+  environment:
+    STAGE: ${self:provider.stage}
+
+  # Number of days that the function logs will be avaiable on CloudWatch
+  logRetentionInDays: 30
+
+package: # Optional deployment packaging configuration
+  exclude:
+    - "envvars.json"
+    - "package-lock.json"
+    - "*.html"
+    - "*.zip"
+  excludeDevDependencies: true
+
+plugins:
+  - serverless-offline
+
+layers:
+  chromium:
+    package:
+      artifact: chromium.zip
+
+functions:
+  pokebot:
+    handler: lambda.handler
+    name: pokebot-${self:provider.stage} # NOTE keep stage in function name to avoid duplicate resources names
+    description:
+    memorySize: 1024 # Memory for this specific function.  Overrides the default set above.
+    timeout: 60 # Timeout for this specific function.  Overrides the default set above.
+    role: ${file(envvars.json):generalRole} # Default role for lambda functions
+
+    # Function level envvars
+    environment:
+      SLACK_TOKEN: ${file(envvars.json):SLACK_TOKEN}
+
+    events:
+      - schedule: cron(0 12-21 * * ? *)
+
+
+    layers:
+      - !Ref ChromiumLambdaLayer

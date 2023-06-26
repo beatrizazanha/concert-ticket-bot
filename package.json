@@ -1,0 +1,29 @@
+{
+  "name": "pokedolar-slack-bot",
+  "version": "1.0.0",
+  "description": "A bot that extracts the dollar quotation from the pokedolar twitter profile and post it to a slack channel",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fuschini/pokedolar-slack-bot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fuschini/pokedolar-slack-bot/issues"
+  },
+  "homepage": "https://github.com/fuschini/pokedolar-slack-bot#readme",
+  "dependencies": {
+    "@slack/web-api": "^6.8.1",
+    "puppeteer-core": "19.6.3"
+  },
+  "devDependencies": {
+    "@sparticuz/chromium": "110.0.0",
+    "puppeteer": "^20.7.3",
+    "serverless-offline": "^12.0.4"
+  }
+}
