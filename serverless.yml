@@ -45,8 +45,7 @@ functions:
       SLACK_TOKEN: ${file(envvars.json):SLACK_TOKEN}
 
     events:
-      - schedule: cron(0 12-21 * * ? *)
-
+      - schedule: cron(15 12-20 * * ? *)
 
     layers:
       - !Ref ChromiumLambdaLayer
