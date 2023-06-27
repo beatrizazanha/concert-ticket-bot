@@ -1,48 +1,34 @@
-const puppeteer = require('puppeteer')
-const { WebClient } = require('@slack/web-api');
+const { getRecentPostPath,
+    getLastPostPath,
+    saveLastPostPath,
+    recentNotEqualLast,
+    composeTwitterUrl,
+    sendSlackMessage } = require('./utils.js');
 
-
-function composeTwitterUrl(path) {
-    return `https://twitter.com/${path}`;
-}
-
-async function getRecentPostPath() {
-    const browser = await puppeteer.launch({ headless: 'new' });
-    const page = await browser.newPage();
-
-    await page.goto('https://twitter.com/pokedolar', { waitUntil: 'networkidle2' });
-
-    // await page.waitForTimeout(2000);
-
-    const article = await page.waitForSelector('article');
-    const innerHTML = await article.$eval('div', el => el.innerHTML);
-    await browser.close();
-
-    const path = innerHTML.match(/href="\/(PokeDolar\/status\/[0-9]+)"/)
-
-    if (path) {
-        console.log(path[1]);
-        return path[1];
-    }
-
-};
-
-async function sendSlackMessage(message) {
-    const token = process.env.SLACK_TOKEN;
-    const web = new WebClient(token);
+(async () => {
     try {
-        // Use the `chat.postMessage` method to send a message from this app
-        await web.chat.postMessage({
-            channel: '@HenriqueFuschini',
-            text: message,
-        });
+        const recentPostPath = 'newPostPath'
+        console.log("Recent post: ", recentPostPath)
+
+        // get last post path
+        const lastPostPath = await getLastPostPath()
+        console.log("Last post: ", lastPostPath)
+
+        // compare recent post with last
+        // if different, send slack message
+        if (recentNotEqualLast(recentPostPath, lastPostPath)) {
+            const twitterURL = composeTwitterUrl(recentPostPath)
+            console.log(twitterURL)
+
+            await sendSlackMessage(twitterURL)
+
+            // save recent post path
+            saveLastPostPath(recentPostPath)
+        } else {
+            console.log("Recent post is the same as last post")
+        }
     } catch (error) {
-        console.log(error);
+        console.log(error)
     }
 }
-
-getRecentPostPath()
-    .then((res) => composeTwitterUrl(res))
-    .then((res) => sendSlackMessage(res))
-    .then(() => console.log('Message sent!'))
-    .catch(error => console.error(error));
+)();

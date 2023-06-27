@@ -1,37 +1,32 @@
-const puppeteer = require("puppeteer-core");
-const chromium = require("@sparticuz/chromium");
-const { WebClient } = require('@slack/web-api');
+const { getRecentPostPath,
+    getLastPostPath,
+    saveLastPostPath,
+    recentNotEqualLast,
+    composeTwitterUrl,
+    sendSlackMessage } = require('./utils.js');
 
 module.exports = {
     handler: async () => {
         try {
-            const browser = await puppeteer.launch({
-                args: chromium.args,
-                defaultViewport: chromium.defaultViewport,
-                executablePath: await chromium.executablePath(),
-                headless: chromium.headless,
-                ignoreHTTPSErrors: true,
-            });
+            const recentPostPath = await getRecentPostPath()
+            console.log("Recent post: ", recentPostPath)
 
-            const page = await browser.newPage();
+            // get last post path
+            const lastPostPath = await getLastPostPath()
+            console.log("Last post: ", lastPostPath)
 
-            await page.goto('https://twitter.com/pokedolar', { waitUntil: 'networkidle2', timeout: 0 });
-
-            const article = await page.waitForSelector('article');
-            const innerHTML = await article.$eval('div', el => el.innerHTML);
-            await browser.close();
-
-            const path = innerHTML.match(/href="\/(PokeDolar\/status\/[0-9]+)"/)
-
-            if (path) {
-                console.log(path[1]);
-
-                const twitterURL = composeTwitterUrl(path[1])
-                console.log(twitterURL);
+            // compare recent post with last
+            // if different, send slack message
+            if (recentNotEqualLast(recentPostPath, lastPostPath)) {
+                const twitterURL = composeTwitterUrl(recentPostPath)
+                console.log(twitterURL)
 
                 await sendSlackMessage(twitterURL)
+
+                // save recent post path
+                await saveLastPostPath(recentPostPath)
             } else {
-                throw new Error("path not found on page")
+                console.log("Recent post is the same as last post")
             }
         } catch (error) {
             console.log(error)
@@ -39,21 +34,3 @@ module.exports = {
         }
     },
 };
-
-function composeTwitterUrl(path) {
-    return `https://twitter.com/${path}`;
-}
-
-async function sendSlackMessage(message) {
-    const token = process.env.SLACK_TOKEN;
-    const web = new WebClient(token);
-    try {
-        // Use the `chat.postMessage` method to send a message from this app
-        await web.chat.postMessage({
-            channel: '#poke-dolar-reloaded',
-            text: message,
-        });
-    } catch (error) {
-        console.log(error);
-    }
-}
