@@ -68,7 +68,7 @@ async function sendSlackMessage(message) {
     try {
         // Use the `chat.postMessage` method to send a message from this app
         await web.chat.postMessage({
-            channel: '#poke-dolar-reloaded',
+            channel: '#poke-dolar',
             text: message,
         });
     } catch (error) {
