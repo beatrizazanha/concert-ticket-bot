@@ -2,3 +2,4 @@
 node_modules
 envvars.json
 .DS_Store
+.env

@@ -43,6 +43,8 @@ functions:
     # Function level envvars
     environment:
       SLACK_TOKEN: ${file(envvars.json):SLACK_TOKEN}
+      TWITTER_USERNAME: ${file(envvars.json):TWITTER_USERNAME}
+      TWITTER_PWD: ${file(envvars.json):TWITTER_PWD}
 
     events:
       - schedule: cron(15,45 11-20 * * ? *)
