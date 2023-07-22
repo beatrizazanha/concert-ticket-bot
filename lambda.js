@@ -1,4 +1,6 @@
-const { getRecentPostPathWithLogin,
+const {
+    getBrowser,
+    getRecentPostPathWithLogin,
     getLastPostPath,
     saveLastPostPath,
     recentNotEqualLast,
@@ -8,7 +10,10 @@ const { getRecentPostPathWithLogin,
 module.exports = {
     handler: async () => {
         try {
-            const recentPostPath = await getRecentPostPathWithLogin()
+            const browser = await getBrowser()
+            console.log("Browser launched");
+
+            const recentPostPath = await getRecentPostPathWithLogin(browser)
             console.log("Recent post: ", recentPostPath)
 
             // get last post path

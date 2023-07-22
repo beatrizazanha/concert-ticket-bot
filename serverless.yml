@@ -18,6 +18,7 @@ provider:
 package: # Optional deployment packaging configuration
   exclude:
     - "envvars.json"
+    - ".env"
     - "package-lock.json"
     - "*.html"
     - "*.zip"
@@ -38,13 +39,16 @@ functions:
     description:
     memorySize: 1024 # Memory for this specific function.  Overrides the default set above.
     timeout: 60 # Timeout for this specific function.  Overrides the default set above.
-    role: ${file(envvars.json):generalRole} # Default role for lambda functions
+    role: ${file(envvars.json):LAMBDA_ROLE_ARN} # Default role for lambda functions
 
     # Function level envvars
     environment:
       SLACK_TOKEN: ${file(envvars.json):SLACK_TOKEN}
       TWITTER_USERNAME: ${file(envvars.json):TWITTER_USERNAME}
       TWITTER_PWD: ${file(envvars.json):TWITTER_PWD}
+      SLACK_CHANNEL: ${file(envvars.json):SLACK_CHANNEL}
+      BUCKET_NAME: ${file(envvars.json):BUCKET_NAME}
+      BUCKET_KEY: ${file(envvars.json):BUCKET_KEY}
 
     events:
       - schedule: cron(15,45 11-20 * * ? *)

@@ -5,6 +5,17 @@ const { S3 } = require("@aws-sdk/client-s3");
 
 const s3Client = new S3({ region: 'us-east-1' });
 
+async function getBrowser() {
+    return await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+        ignoreHTTPSErrors: true,
+    });
+}
+
+// Legacy method used when twitter didn't demand a login to access a page
 async function getRecentPostPath() {
     const browser = await puppeteer.launch({
         args: chromium.args,
@@ -32,16 +43,14 @@ async function getRecentPostPath() {
     throw new Error("path not found on page")
 }
 
-async function getRecentPostPathWithLogin() {
-    const browser = await puppeteer.launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: false,
-        ignoreHTTPSErrors: true,
-    });
-
-    console.log("Browser launched");
+async function getRecentPostPathWithLogin(browser) {
+    // const browser = await puppeteer.launch({
+    //     args: chromium.args,
+    //     defaultViewport: chromium.defaultViewport,
+    //     executablePath: await chromium.executablePath(),
+    //     headless: false,
+    //     ignoreHTTPSErrors: true,
+    // });
 
     // Open twitter
     const page = await browser.newPage();
@@ -92,8 +101,8 @@ async function getRecentPostPathWithLogin() {
 async function getLastPostPath() {
 
     const object = await s3Client.getObject({
-        Bucket: 'fuscassets',
-        Key: 'pokebot/pokedolarLastPost.txt'
+        Bucket: process.env.BUCKET_NAME,
+        Key: process.env.BUCKET_KEY,
     })
 
     const body = await object.Body.transformToString();
@@ -106,8 +115,8 @@ function recentNotEqualLast(recent, last) {
 
 async function saveLastPostPath(path) {
     const object = await s3Client.putObject({
-        Bucket: 'fuscassets',
-        Key: 'pokebot/pokedolarLastPost.txt',
+        Bucket: process.env.BUCKET_NAME,
+        Key: process.env.BUCKET_KEY,
         Body: path
     })
 
@@ -125,7 +134,7 @@ async function sendSlackMessage(message) {
     try {
         // Use the `chat.postMessage` method to send a message from this app
         await web.chat.postMessage({
-            channel: '#poke-dolar',
+            channel: process.env.SLACK_CHANNEL,
             text: message,
         });
     } catch (error) {
@@ -135,6 +144,7 @@ async function sendSlackMessage(message) {
 }
 
 module.exports = {
+    getBrowser,
     getRecentPostPath,
     getRecentPostPathWithLogin,
     getLastPostPath,
