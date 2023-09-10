@@ -26,7 +26,8 @@ module.exports = {
                 const twitterURL = composeTwitterUrl(recentPostPath)
                 console.log(twitterURL)
 
-                await sendSlackMessage(twitterURL)
+                // TODO: implement Telegram integration
+                // await sendSlackMessage(twitterURL)
 
                 // save recent post path
                 await saveLastPostPath(recentPostPath)

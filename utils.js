@@ -27,13 +27,13 @@ async function getRecentPostPath() {
 
     const page = await browser.newPage();
 
-    await page.goto('https://twitter.com/pokedolar', { waitUntil: 'networkidle2', timeout: 0 });
+    await page.goto('https://twitter.com/botdeingresso', { waitUntil: 'networkidle2', timeout: 0 });
 
     const article = await page.waitForSelector('article');
     const innerHTML = await article.$eval('div', el => el.innerHTML);
     await browser.close();
 
-    const path = innerHTML.match(/href="\/(PokeDolar\/status\/[0-9]+)"/)
+    const path = innerHTML.match(/href="\/(BotDeIngresso\/status\/[0-9]+)"/)
     console.log("Recent post", path)
 
     if (path) {
@@ -54,7 +54,7 @@ async function getRecentPostPathWithLogin(browser) {
 
     // Open twitter
     const page = await browser.newPage();
-    await page.goto('https://twitter.com/pokedolar', { waitUntil: 'networkidle2', timeout: 0 });
+    await page.goto('https://twitter.com/botdeingresso', { waitUntil: 'networkidle2', timeout: 0 });
 
     console.log("Twitter opened");
 
@@ -88,7 +88,7 @@ async function getRecentPostPathWithLogin(browser) {
     await browser.close();
 
     // Extract post path from HTML
-    const path = innerHTML.match(/href="\/(PokeDolar\/status\/[0-9]+)"/)
+    const path = innerHTML.match(/href="\/(BotDeIngresso\/status\/[0-9]+)"/)
     console.log("Recent post", path)
 
     if (path) {
